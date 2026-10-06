@@ -138,6 +138,18 @@ class TestWalletX509(IsolatedAsyncioTestCase):
             fetched = await MultikeyManager(session).from_multikey(created["multikey"])
             assert fetched["metadata"] == {"purpose": "issuance"}
 
+    async def test_csr_rejects_invalid_subject_values(self):
+        """Values outside X.520 limits are a WalletError (400), not a crash."""
+        async with self.profile.session() as session:
+            wallet, key_info = await self._key_info(session, self.key["multikey"])
+            for subject, field in (
+                ({"common_name": "h" * 72}, "common_name"),
+                ({"country": "Canada"}, "country"),
+                ({"organization": 123}, "organization"),
+            ):
+                with self.assertRaisesRegex(WalletError, f"invalid subject {field}"):
+                    await build_csr(wallet, key_info.verkey, key_info.key_type, subject)
+
     def test_split_pem_chain_rejects_non_pem(self):
         with self.assertRaises(WalletError):
             split_pem_chain("not a pem")

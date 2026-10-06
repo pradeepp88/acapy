@@ -140,15 +140,24 @@ class WalletBackedPrivateKey(EllipticCurvePrivateKey):
         return self
 
 
+def _name_attribute(field: str, oid: x509.ObjectIdentifier, value) -> x509.NameAttribute:
+    # cryptography enforces X.520 limits (e.g. common_name <= 64 chars, country
+    # exactly 2); surface those as a WalletError so callers get a 400, not a 500.
+    try:
+        return x509.NameAttribute(oid, value)
+    except (TypeError, ValueError) as err:
+        raise WalletError(f"invalid subject {field}: {err}") from err
+
+
 def _build_subject(subject: dict) -> x509.Name:
     attrs = [
-        x509.NameAttribute(oid, subject[field])
+        _name_attribute(field, oid, subject[field])
         for field, oid in _SUBJECT_FIELDS.items()
         if field in subject
     ]
     cn = subject.get("cn") or subject.get("common_name")
     if cn:
-        attrs.append(x509.NameAttribute(NameOID.COMMON_NAME, cn))
+        attrs.append(_name_attribute("common_name", NameOID.COMMON_NAME, cn))
     if not attrs:
         raise WalletError("subject must contain at least one field")
     return x509.Name(attrs)
