@@ -1,8 +1,11 @@
+import json
 import os
 import shutil
 import unittest
+
 import pytest
 from aiohttp.web import HTTPBadRequest, HTTPNotFound
+from multidict import MultiDict
 
 from ...admin.request_context import AdminRequestContext
 from ...ledger.base import BaseLedger
@@ -23,8 +26,6 @@ from ...utils.testing import create_test_profile
 from .. import routes as test_module
 from ..manager import RevocationManager
 from ..models.issuer_rev_reg_record import IssuerRevRegRecord
-from multidict import MultiDict
-import json
 
 
 class TestRevocationRoutes(unittest.IsolatedAsyncioTestCase):
@@ -579,6 +580,17 @@ class TestRevocationRoutes(unittest.IsolatedAsyncioTestCase):
             result = await test_module.rev_regs_created(self.request)
             mock_json_response.assert_called_once_with({"rev_reg_ids": ["dummy"]})
             assert result is mock_json_response.return_value
+
+            # STATE_INIT exclusion is pushed into the tag query (not a post-filter)
+            # and pagination parameters are forwarded to storage.
+            call = mock_query.call_args
+            tag_filter = call.args[1]
+            assert tag_filter["$not"] == {
+                "state": test_module.IssuerRevRegRecord.STATE_INIT
+            }
+            assert "post_filter_negative" not in call.kwargs
+            assert call.kwargs["limit"] == 100
+            assert call.kwargs["offset"] == 0
 
     async def test_get_rev_reg(self):
         REV_REG_ID = "{}:4:{}:3:CL:1234:default:CL_ACCUM:default".format(

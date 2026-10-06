@@ -14,14 +14,14 @@ from acapy_controller.models import V20PresExRecord
 from acapy_controller.protocols import (
     DIDResult,
     anoncreds_publish_revocation,
+    anoncreds_revoke,
     didexchange,
     indy_anoncred_credential_artifacts,
-    anoncreds_revoke,
     indy_issue_credential_v2,
-    indy_present_proof_v2,
     params,
 )
 from aiohttp import ClientSession
+from examples.util import _presentation_request_payload, indy_present_proof_v2
 
 ALICE = getenv("ALICE", "http://alice:3001")
 BOB = getenv("BOB", "http://bob:3001")
@@ -29,12 +29,12 @@ BOB = getenv("BOB", "http://bob:3001")
 
 def summary(presentation: V20PresExRecord) -> str:
     """Summarize a presentation exchange record."""
-    request = presentation.pres_request
+    request = _presentation_request_payload(presentation)
     return "Summary: " + json.dumps(
         {
             "state": presentation.state,
             "verified": presentation.verified,
-            "presentation_request": request.dict(by_alias=True) if request else None,
+            "presentation_request": request,
         },
         indent=2,
         sort_keys=True,
@@ -97,7 +97,7 @@ async def main():
             {"firstname": "Bob", "lastname": "Builder"},
         )
 
-        # Present the the credential's attributes
+        # Present the credential's attributes
         await indy_present_proof_v2(
             bob,
             alice,
