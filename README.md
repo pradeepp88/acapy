@@ -1,6 +1,6 @@
-# ACA-Py -- A Cloud Agent - Python  <!-- omit in toc -->
+# ACA-Py -- Adaptive Cloud Agent - Python  <!-- omit in toc -->
 
-![Python](https://img.shields.io/badge/python-3.12-blue.svg)
+![Python](https://img.shields.io/badge/python-3.13-blue.svg)
 [![PyPI version](https://img.shields.io/pypi/v/acapy-agent)](https://pypi.org/project/acapy-agent/)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=openwallet-foundation_acapy&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=openwallet-foundation_acapy)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=openwallet-foundation_acapy&metric=coverage)](https://sonarcloud.io/summary/new_code?id=openwallet-foundation_acapy)
@@ -9,10 +9,10 @@
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/openwallet-foundation/acapy/badge)](https://scorecard.dev/viewer/?uri=github.com/openwallet-foundation/acapy)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/openwallet-foundation/acapy)
 
-ACA-Py is a production-ready, open-source self-sovereign identity (SSI) agent for building non-mobile decentralized trust services—such as verifiable credential issuers, holders, and verifiers—using any language capable of sending and receiving HTTP requests. Maintained by the OpenWallet Foundation, ACA-Py began in the Hyperledger Indy/AnonCreds/Aries ecosystem and has evolved to include support multiple verifiable credential formats and exchange protocols. It serves as a foundational building block for Trust Over IP-based ecosystems.
+Adaptive Cloud Agent - Python (ACA-Py) is a production-ready, open-source self-sovereign identity (SSI) agent for building non-mobile decentralized trust services—such as verifiable credential issuers, holders, and verifiers—using any language capable of sending and receiving HTTP requests. Maintained by the OpenWallet Foundation, ACA-Py began in the Hyperledger Indy/AnonCreds/Aries ecosystem and has evolved to include support multiple verifiable credential formats and exchange protocols. It serves as a foundational building block for Trust Over IP-based ecosystems.
 
 Full access to an organized set of all of the ACA-Py documents is available at [https://aca-py.org](https://aca-py.org).
-Check it out! It's much easier to navigate than the ACA-Py GitHub repo for reading the documentation. ACA-Py documentation is also AI-generated on the [DeepWiki] website at [DeepWiki ACA-Py]. DeepWiki provides a chatbot interface that can be used to ask questions about ACA-Py and get answers based on the documentation.
+It's much easier to navigate than the ACA-Py GitHub repo for reading the documentation. ACA-Py documentation is also AI-generated on the [DeepWiki] website at [DeepWiki ACA-Py]. DeepWiki provides a chatbot interface that can be used to ask questions about ACA-Py and get answers based on the documentation.
 
 [DeepWiki]: https://deepwiki.com
 [DeepWiki ACA-Py]: https://deepwiki.com/openwallet-foundation/acapy
@@ -23,12 +23,12 @@ Visit the ACA-Py Plugins Store at [https://plugins.aca-py.org](https://plugins.a
 
 ACA-Py is a foundation for building Verifiable Credential (VC) ecosystems. It operates in the second and third layers of the [Trust Over IP Model](https://trustoverip.org/wp-content/uploads/model-panel-full-2048x1146.png) using a variety of verifiable credential formats and protocols. ACA-Py runs on servers (cloud, enterprise, IoT devices, and so forth), and is not designed to run on mobile devices.
 
-ACA-Py includes support for the concepts and features that make up [Aries Interop Profile (AIP) 2.0](https://github.com/decentralized-identity/aries-rfcs/tree/main/concepts/0302-aries-interop-profile#aries-interop-profile-version-20). [ACA-Py’s supported features](./docs/features/SupportedRFCs.md) include, most importantly, protocols for issuing, verifying, and holding verifiable credentials using both [Hyperledger AnonCreds] verifiable credential format, and the [W3C Standard Verifiable Credential Data Model] format using JSON-LD with LD-Signatures and BBS+ Signatures. Coming soon -- issuing and presenting [Hyperledger AnonCreds] verifiable credentials using the [W3C Standard Verifiable Credential Data Model] format.
+ACA-Py includes support for the concepts and features that make up [Aries Interop Profile (AIP) 2.0](https://github.com/decentralized-identity/aries-rfcs/tree/main/concepts/0302-aries-interop-profile#aries-interop-profile-version-20). [ACA-Py’s supported features](./docs/features/SupportedRFCs.md) include, most importantly, protocols for issuing, verifying, and holding verifiable credentials using both [AnonCreds] verifiable credential format, and the [W3C Standard Verifiable Credential Data Model] format using JSON-LD with Data Integrity Proofs and BBS+ Signatures. It is also possible to issue and present [AnonCreds] verifiable credentials using the [W3C Standard Verifiable Credential Data Model] format.
 
-[Hyperledger AnonCreds]: https://www.lfdecentralizedtrust.org/projects/anoncreds
+[AnonCreds]: https://www.lfdecentralizedtrust.org/projects/anoncreds
 [W3C Standard Verifiable Credential Data Model]: https://www.w3.org/TR/vc-data-model/
 
-To use ACA-Py you create a business logic "controller" that talks to an ACA-Py instance (sending HTTP requests and receiving webhook notifications), and ACA-Py handles the various protocols and related functionality. Your controller can be built in any language that supports making and receiving HTTP requests; knowledge of Python is not needed. Together, this means you can focus on building VC solutions using familiar web development technologies, instead of having to learn the nuts and bolts of low-level cryptography and Trust over IP-type protocols.
+To use ACA-Py you create a business logic "controller" that talks to an ACA-Py instance (sending HTTP requests and receiving webhook notifications), and ACA-Py handles the various protocols and related functionality. Your controller can be built in any language that supports making and receiving HTTP requests; knowledge of Python is not needed. This approach means you can focus on building VC solutions using familiar web development technologies, instead of having to learn the nuts and bolts of low-level cryptography and Trust over IP-type protocols.
 
 This [checklist-style overview document](./docs/features/SupportedRFCs.md) provides a full list of the features in ACA-Py.
 The following is a list of some of the core features needed for a production deployment, with a link to detailed information about the capability.
@@ -45,29 +45,30 @@ the [LTS strategy](./LTS-Strategy.md).
 
 ### LTS Docker Images
 
-ACA-Py publishes Git tags in the format `x.y-lts` (e.g., `1.2-lts`) along with 
+ACA-Py publishes Git tags in the format `x.y-lts` (e.g., `1.6-lts`) along with 
 corresponding Docker images to the GitHub Container Registry (GHCR) for each LTS release. These 
 Docker images are tagged with a stable `-lts` suffix, making it easier for developers to rely on 
 a consistent and maintained version line.
 
-You can pull the latest LTS image for version `1.2` using the following image tag:
+You can pull the latest LTS image for version `1.6` using the following image tag:
 
 ```bash
-ghcr.io/openwallet-foundation/acapy-agent:py3.12-1.2-lts
+FROM ghcr.io/openwallet-foundation/acapy-agent:py3.13-1.6-lts
 ```
 
 The `-lts` tags are kept up to date with the latest patch releases from the corresponding 
 `*.lts` branches. This ensures that consumers of the LTS Docker images always receive the most recent, 
 supported version within that release series.
 
-**Current LTS releases:**
+**Active LTS releases:**
 
-- Release [1.3](https://github.com/openwallet-foundation/acapy/releases/tag/1.3.1) **Current LTS Release**
-- Release [1.2](https://github.com/openwallet-foundation/acapy/releases/tag/1.2.5) **End of Life: April 2026**
-- Release [0.12](https://github.com/openwallet-foundation/acapy/releases/tag/0.12.8) **End of Life: October 2025**
+- Release [1.6](https://github.com/openwallet-foundation/acapy/blob/1.6.lts/CHANGELOG.md) **Current LTS Release**
+- Release [1.3](https://github.com/openwallet-foundation/acapy/blob/1.3.lts/CHANGELOG.md) **End of Life: January 2027**
 
 **Past LTS releases:**
 
+- Release [1.2](https://github.com/openwallet-foundation/acapy/releases/tag/1.2.5) **End of Life: April 2026**
+- Release [0.12](https://github.com/openwallet-foundation/acapy/releases/tag/0.12.8) **End of Life: October 2025**
 - Release [0.11](https://github.com/openwallet-foundation/acapy/releases/tag/0.11.3) **End of Life: January 2025**
 
 Unless specified in the **Breaking Changes** section of the ACA-Py
@@ -181,3 +182,7 @@ Pull requests are welcome! Please read our [contributions guide](./CONTRIBUTING.
 ## License
 
 [Apache License Version 2.0](https://github.com/openwallet-foundation/acapy/blob/main/LICENSE)
+
+## Governance
+
+The Project Charter for Adaptive Cloud Agent - Python (ACA-py) can be found here: [https://github.com/openwallet-foundation/technical-project-charters/blob/main/aca-py_Technical%20Charter_05-11-2026.pdf](https://github.com/openwallet-foundation/technical-project-charters/blob/main/aca-py_Technical%20Charter_05-11-2026.pdf)

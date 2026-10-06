@@ -9,7 +9,9 @@ from aiohttp import web
 from aiohttp_apispec import docs, querystring_schema, request_schema, response_schema
 from marshmallow import fields, validate
 
-from ..admin.decorators.auth import tenant_authentication
+from ..admin import scopes
+from ..admin.auth_context import has_auth_wallet_id
+from ..admin.decorators.auth import require_scope, tenant_authentication
 from ..admin.request_context import AdminRequestContext
 from ..config.injection_context import InjectionContext
 from ..connections.base_manager import BaseConnectionManager
@@ -560,6 +562,7 @@ async def wallet_did_list(request: web.BaseRequest):
 @request_schema(DIDCreateSchema())
 @response_schema(DIDResultSchema, 200, description="")
 @tenant_authentication
+@require_scope(scopes.WALLET_CREATE, scopes.ADMIN)
 async def wallet_create_did(request: web.BaseRequest):
     """Request handler for creating a new local DID in the wallet.
 
@@ -987,6 +990,7 @@ async def wallet_set_did_endpoint(request: web.BaseRequest):
 
     Args:
         request: aiohttp request object
+
     """
     context: AdminRequestContext = request["context"]
 
@@ -1252,6 +1256,7 @@ async def wallet_sd_jwt_verify(request: web.BaseRequest):
         web.HTTPBadRequest: If there is an error with the JWS header or verification
             method.
         web.HTTPNotFound: If there is an error resolving the verification method.
+
     """
     context: AdminRequestContext = request["context"]
     body = await request.json()
@@ -1359,8 +1364,9 @@ class UpgradeResultSchema(OpenAPISchema):
 
 @docs(
     tags=[UPGRADE_TAG_TITLE],
-    summary="Upgrade the wallet from askar to askar-anoncreds. Be very careful with this!"
-    " You cannot go back! See migration guide for more information.",
+    summary="Upgrade the wallet from askar to askar-anoncreds OR kanon to "
+    "kanon-anoncreds. Be very careful with this! You cannot go back! "
+    "See migration guide for more information.",
 )
 @querystring_schema(UpgradeVerificationSchema())
 @response_schema(UpgradeResultSchema(), description="")
@@ -1383,7 +1389,7 @@ async def upgrade_anoncreds(request: web.BaseRequest):
             reason="Wallet name parameter does not match the agent which triggered the upgrade"  # noqa: E501
         )
 
-    if profile.settings.get("wallet.type") == "askar-anoncreds":
+    if profile.settings.get("wallet.type") in ("askar-anoncreds", "kanon-anoncreds"):
         raise web.HTTPBadRequest(reason="Wallet type is already anoncreds")
 
     async with profile.session() as session:
@@ -1393,7 +1399,7 @@ async def upgrade_anoncreds(request: web.BaseRequest):
             UPGRADING_RECORD_IN_PROGRESS,
         )
         await storage.add_record(upgrading_record)
-        is_subwallet = context.metadata and "wallet_id" in context.metadata
+        is_subwallet = has_auth_wallet_id(context)
         # Create background task and store reference to prevent garbage collection
         task = asyncio.create_task(
             upgrade_wallet_to_anoncreds_if_requested(profile, is_subwallet)
@@ -1421,7 +1427,6 @@ def register_events(event_bus: EventBus):
 
 async def on_register_nym_event(profile: Profile, event: Event):
     """Handle any events we need to support."""
-
     # after the nym record is written, promote to wallet public DID
     if is_author_role(profile) and profile.context.settings.get_value(
         "endorser.auto_promote_author_did"
@@ -1489,7 +1494,6 @@ async def on_register_nym_event(profile: Profile, event: Event):
 
 async def register(app: web.Application):
     """Register routes."""
-
     app.add_routes(
         [
             web.get("/wallet/did", wallet_did_list, allow_head=False),
@@ -1512,7 +1516,6 @@ async def register(app: web.Application):
 
 def post_process_routes(app: web.Application):
     """Amend swagger API."""
-
     # Add top-level tags description
     if "tags" not in app._state["swagger_dict"]:
         app._state["swagger_dict"]["tags"] = []
