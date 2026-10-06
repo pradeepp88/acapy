@@ -179,6 +179,7 @@ class MultikeyManager:
                 "multikey": verkey_to_multikey(
                     key_info.verkey, alg=key_info.key_type.key_type
                 ),
+                "metadata": key_info.metadata or {},
             }
         except WalletError as err:
             LOGGER.error(err)
@@ -194,9 +195,16 @@ class MultikeyManager:
             "multikey": verkey_to_multikey(
                 key_info.verkey, alg=key_info.key_type.key_type
             ),
+            "metadata": key_info.metadata or {},
         }
 
-    async def create(self, seed: str = None, kid: str = None, alg: str = DEFAULT_ALG):
+    async def create(
+        self,
+        seed: str = None,
+        kid: str = None,
+        alg: str = DEFAULT_ALG,
+        metadata: dict = None,
+    ):
         """Create a new key pair."""
 
         if alg not in ALG_MAPPINGS:
@@ -208,12 +216,26 @@ class MultikeyManager:
             raise MultikeyManagerError(f"kid '{kid}' already exists in wallet.")
 
         key_type = ALG_MAPPINGS[alg]["key_type"]
-        key_info = await self.wallet.create_key(key_type=key_type, seed=seed, kid=kid)
+        key_info = await self.wallet.create_key(
+            key_type=key_type, seed=seed, kid=kid, metadata=metadata
+        )
 
         return {
             "kid": key_info.kid,
             "multikey": verkey_to_multikey(key_info.verkey, alg=alg),
+            "metadata": key_info.metadata or {},
         }
+
+    async def update_metadata(self, multikey: str, metadata: dict):
+        """Replace the metadata bound to a key pair."""
+        verkey = multikey_to_verkey(multikey)
+        try:
+            await self.wallet.replace_signing_key_metadata(verkey, metadata)
+        except WalletError as err:
+            LOGGER.error(err)
+            raise MultikeyManagerError(err)
+
+        return await self.from_multikey(multikey)
 
     async def update(self, multikey: str, kid: str, unbind=False):
         """Bind or unbind a kid with a key pair."""
